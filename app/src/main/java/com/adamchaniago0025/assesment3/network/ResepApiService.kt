@@ -19,7 +19,7 @@ import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Query
 
-private const val BASE_URL = "https://ab25-35-194-237-234.ngrok-free.app/"
+private const val BASE_URL = "https://ab25-35-194-237-234.ngrok-free.app/api/"
 
 private val moshi = Moshi.Builder()
     .add(KotlinJsonAdapterFactory())
@@ -43,7 +43,7 @@ interface ResepApiService {
         @Part("judul") judul: RequestBody,
         @Part("kategori") kategori: RequestBody,
         @Part("deskripsi") deskripsi: RequestBody,
-        @Part image: MultipartBody.Part? = null
+        @Part image: MultipartBody.Part
     ): OpStatus
 
     @Multipart
@@ -78,7 +78,7 @@ object ResepApi {
         retrofit.create(ResepApiService::class.java)
     }
     fun getResepUrl(imageId: Long) :String {
-        return "${BASE_URL}buku/image/$imageId"
+        return "${BASE_URL}resep/image/$imageId"
     }
 }
 
