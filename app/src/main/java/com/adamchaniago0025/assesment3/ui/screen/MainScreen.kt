@@ -93,14 +93,8 @@ fun MainScreen() {
     val viewModel: MainViewModel = viewModel()
     val errorMessage by viewModel.errorMessage
     var showDialog by remember { mutableStateOf(false) }
-    var showHewanDialog by remember { mutableStateOf(false) }
+    var showResepDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
-
-    var bitmap:Bitmap? by remember { mutableStateOf(null) }
-    var launcher = rememberLauncherForActivityResult(CropImageContract()) {
-        bitmap = getCroppedImage(context.contentResolver, it)
-        if (bitmap != null) showHewanDialog = true
-    }
 
     var selectedResep by remember { mutableStateOf<Resep?>(null) }
 
@@ -134,14 +128,7 @@ fun MainScreen() {
         },
         floatingActionButton = {
             FloatingActionButton(onClick = {
-                val options = CropImageContractOptions(
-                    null, CropImageOptions(
-                        imageSourceIncludeGallery = false,
-                        imageSourceIncludeCamera = true,
-                        fixAspectRatio = true
-                    )
-                )
-                launcher.launch(options)
+                showResepDialog = true
             }) {
                 Icon(
                     imageVector = Icons.Default.Add,
@@ -150,8 +137,8 @@ fun MainScreen() {
             }
         },
     ) { innePading ->
-        ScreenContent(viewModel,user.email, Modifier.padding(innePading)) { hewan ->
-            selectedResep = hewan
+        ScreenContent(viewModel,user.token, Modifier.padding(innePading)) { resep ->
+            selectedResep = resep
             showDeleteDialog = true
         }
 
@@ -165,13 +152,12 @@ fun MainScreen() {
 
         }
 
-        if (showHewanDialog) {
-            HewanDialog(
-                bitmap = bitmap,
-                onDismissRequest = { showHewanDialog = false}
+        if (showResepDialog) {
+            ResepDialog(
+                onDismissRequest = { showResepDialog = false}
             ) {
-                    nama, namaLatin -> viewModel.saveData(user.email, nama, namaLatin,bitmap!!)
-                showHewanDialog = false
+                judul, kategori, deskripsi, bitmap -> viewModel.saveData(user.token, judul, kategori, deskripsi,bitmap!!)
+                showResepDialog = false
             }
         }
 
@@ -184,7 +170,7 @@ fun MainScreen() {
             DisplayAlertDialog(
                 onDismissRequest = { showDeleteDialog = false },
                 onConfirmation = {
-                    selectedResep?.let { viewModel.deleteData(user.email, it.id) }
+                    selectedResep?.let { viewModel.deleteData(user.token, it.id_resep) }
                     showDeleteDialog = false
                 }
             )
@@ -193,12 +179,24 @@ fun MainScreen() {
 }
 
 @Composable
-fun ScreenContent(viewModel: MainViewModel, userId: String, modifier: Modifier = Modifier, onDelete: (Resep) -> Unit) {
+fun ScreenContent(viewModel: MainViewModel, token: String, modifier: Modifier = Modifier, onDelete: (Resep) -> Unit) {
     val data by viewModel.data
     val status by viewModel.status.collectAsState()
+    var showDetailDialog by remember { mutableStateOf<Resep?>(null) }
 
-    LaunchedEffect(userId) {
-        viewModel.retrieveData(userId)
+    LaunchedEffect(token) {
+        viewModel.retrieveData(token)
+    }
+
+    if (showDetailDialog != null) {
+        ResepDialog (
+            resep = showDetailDialog!!,
+            onDismissRequest = { showDetailDialog = null },
+            onConfirmation = { judul, penulis, penerbit, bitmap ->
+                viewModel.updateData(token, showDetailDialog!!.id_resep, judul, penulis, penerbit, bitmap)
+                showDetailDialog = null
+            }
+        )
     }
     when (status) {
         ApiStatus.LOADING -> {
@@ -234,7 +232,7 @@ fun ScreenContent(viewModel: MainViewModel, userId: String, modifier: Modifier =
                     text = stringResource(id = R.string.error)
                 )
                 Button(
-                    onClick = { viewModel.retrieveData(userId) },
+                    onClick = { viewModel.retrieveData(token) },
                     modifier = Modifier.padding(top = 16.dp),
                     contentPadding = PaddingValues(horizontal = 32.dp, vertical = 16.dp)
                 ) {
@@ -259,10 +257,10 @@ fun ListItem(resep: Resep, onDelete: () -> Unit) {
     ) {
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
-                .data(ResepApi.getResepUrl(resep.imageId))
+                .data(ResepApi.getResepUrl(resep.id_resep))
                 .crossfade(true)
                 .build(),
-            contentDescription = stringResource(R.string.gambar, resep.nama),
+            contentDescription = stringResource(R.string.gambar, resep.judul),
             contentScale = ContentScale.Crop,
             placeholder = painterResource(id = R.drawable.loading_img),
             error = painterResource(id = R.drawable.broken_img),
@@ -283,12 +281,12 @@ fun ListItem(resep: Resep, onDelete: () -> Unit) {
             ) {
                 Column {
                     Text(
-                        text = resep.nama,
+                        text = resep.judul,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
                     )
                     Text(
-                        text = resep.namaLatin,
+                        text = resep.kategori,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White
@@ -359,23 +357,7 @@ private suspend fun signOut(context: Context, dataStore: UserDataStore) {
         Log.e("SIGN-IN", "Error: ${e.errorMessage}")
     }
 }
-private fun getCroppedImage (
-    resolver: ContentResolver,
-    result: CropImageView.CropResult
-): Bitmap? {
-    if (!result.isSuccessful) {
-        Log.e("IMAGE", "error ${result.error}")
-        return null
-    }
-    val uri = result.uriContent ?: return null
 
-    return if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
-        MediaStore.Images.Media.getBitmap(resolver, uri)
-    } else {
-        val source = ImageDecoder.createSource(resolver, uri)
-        ImageDecoder.decodeBitmap(source)
-    }
-}
 
 
 @Preview(showBackground = true)
