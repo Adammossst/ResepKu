@@ -43,7 +43,19 @@ interface ResepApiService {
         @Part("judul") judul: RequestBody,
         @Part("kategori") kategori: RequestBody,
         @Part("deskripsi") deskripsi: RequestBody,
-        @Part image: MultipartBody.Part
+        @Part image: MultipartBody.Part? = null
+    ): OpStatus
+
+    @Multipart
+    @POST("resep/{id_resep}")
+    suspend fun updateResep(
+        @Header("Authorization") token: String,
+        @Part("_method") method: RequestBody,
+        @Path("id_resep") id_resep: Long,
+        @Part("judul") judul: RequestBody,
+        @Part("kategori") kategori: RequestBody,
+        @Part("deskripsi") deskripsi: RequestBody,
+        @Part image: MultipartBody.Part? = null
     ): OpStatus
 
     @DELETE("resep/{id_resep}")
