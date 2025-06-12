@@ -77,7 +77,7 @@ object ResepApi {
     val service: ResepApiService by lazy {
         retrofit.create(ResepApiService::class.java)
     }
-    fun getResepUrl(imageId: String) :String {
+    fun getResepUrl(imageId: Long) :String {
         return "${BASE_URL}buku/image/$imageId"
     }
 }
