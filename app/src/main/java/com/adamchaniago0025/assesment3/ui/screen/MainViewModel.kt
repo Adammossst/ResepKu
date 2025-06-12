@@ -38,16 +38,15 @@ class MainViewModel : ViewModel() {
             }
         }
     }
-    fun saveData(token: String, judul: String, kategori: String, deskripsi: String, bitmap: Bitmap?) {
+    fun saveData(token: String, judul: String, kategori: String, deskripsi: String, bitmap: Bitmap) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val bitmapPart = bitmap?.toMultipartBody() ?: MultipartBody.Part.createFormData("image", "")
                 val result = ResepApi.service.postResep(
                     token,
                     judul.toRequestBody("text/plain".toMediaTypeOrNull()),
                     kategori.toRequestBody("text/plain".toMediaTypeOrNull()),
                     deskripsi.toRequestBody("text/plain".toMediaTypeOrNull()),
-                    bitmapPart
+                    bitmap.toMultipartBody()
                 )
                 if (result.status == "success")
                     retrieveData(token)
@@ -59,10 +58,30 @@ class MainViewModel : ViewModel() {
             }
         }
     }
+
+    suspend fun register(nama: String, email: String, password: String): String {
+        var token = ""
+        try {
+            val result = ResepApi.service.postRegister(
+                nama,
+                email,
+                password
+            )
+
+            if (result.status == "success") {
+                 token = result.data ?: ""
+            }
+        } catch (e: Exception) {
+            Log.e("MainViewModel", "Failure: ${e.message}")
+        }
+
+        return token
+    }
+
     fun updateData(token: String, id_resep: Long, judul: String, kategori: String, deskripsi: String, bitmap: Bitmap?) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val bitmapPart = bitmap?.toMultipartBody() ?: MultipartBody.Part.createFormData("image", "")
+                val bitmapPart = bitmap?.toMultipartBody()
                 val result = ResepApi.service.updateResep(
                     token,
                     "PUT".toRequestBody("text/plain".toMediaTypeOrNull()),
