@@ -102,28 +102,27 @@ fun ResepDialog(
                             contentDescription = null,
                             modifier = Modifier.fillMaxWidth().aspectRatio(1f)
                         )
-                    } else {
-                        OutlinedButton(
-                            onClick = {
-                                val options = CropImageContractOptions(
-                                    null, CropImageOptions(
-                                        imageSourceIncludeGallery = false,
-                                        imageSourceIncludeCamera = true,
-                                        fixAspectRatio = true
-                                    )
-                                )
-                                launcher.launch(options)
-                            },
-                            modifier = Modifier.padding(top = 8.dp).fillMaxWidth()
-                        ) {
-
-                        }
                     }
+                }
+                OutlinedButton(
+                    onClick = {
+                        val options = CropImageContractOptions(
+                            null, CropImageOptions(
+                                imageSourceIncludeGallery = false,
+                                imageSourceIncludeCamera = true,
+                                fixAspectRatio = true
+                            )
+                        )
+                        launcher.launch(options)
+                    },
+                    modifier = Modifier.padding(top = 8.dp).fillMaxWidth()
+                ) {
+                    Text(text = stringResource(R.string.pilih_gambar))
                 }
                 OutlinedTextField(
                     value = judul,
                     onValueChange = { judul = it },
-                    label = { Text(text = stringResource(id = R.string.nama)) },
+                    label = { Text(text = stringResource(id = R.string.judul)) },
                     maxLines = 1,
                     keyboardOptions = KeyboardOptions(
                         capitalization = KeyboardCapitalization.Words,
@@ -134,7 +133,7 @@ fun ResepDialog(
                 OutlinedTextField(
                     value = kategori,
                     onValueChange = { kategori = it },
-                    label = { Text(text = stringResource(id = R.string.nama_latin)) },
+                    label = { Text(text = stringResource(id = R.string.kategori)) },
                     maxLines = 1,
                     keyboardOptions = KeyboardOptions(
                         capitalization = KeyboardCapitalization.Sentences,
@@ -145,7 +144,7 @@ fun ResepDialog(
                 OutlinedTextField(
                     value = deskripsi,
                     onValueChange = { deskripsi = it },
-                    label = { Text(text = stringResource(id = R.string.nama_latin)) },
+                    label = { Text(text = stringResource(id = R.string.deskripsi)) },
                     maxLines = 1,
                     keyboardOptions = KeyboardOptions(
                         capitalization = KeyboardCapitalization.Sentences,
