@@ -93,12 +93,12 @@ class MainViewModel : ViewModel() {
 
     }
 
-    fun deleteData(token: String, hewanId: String) {
+    fun deleteData(token: String, resepId: Long) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 val result = ResepApi.service.deleteResep(
                     token,
-                    hewanId
+                    resepId
                 )
                 if (result.status == "success")
                     retrieveData(token)

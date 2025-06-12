@@ -61,7 +61,7 @@ interface ResepApiService {
     @DELETE("resep/{id_resep}")
     suspend fun deleteResep(
         @Header("Authorization") token: String,
-        @Path("id_resep") id: String
+        @Path("id_resep") id_resep: Long
     ): OpStatus
 
     @FormUrlEncoded
