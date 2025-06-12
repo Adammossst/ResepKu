@@ -7,8 +7,10 @@
     <string name="tutup">Tutup</string>
     <string name="logout">Logout</string>
     <string name="tambah_hewan">Tambah Hewan</string>
-    <string name="nama">Nama</string>
-    <string name="nama_latin">Nama Latin</string>
+    <string name="judul">Judul</string>
+    <string name="kategori">Kategori</string>
+    <string name="deskripsi">Deskripsi</string>
+    <string name="pilih_gambar">Pilih Gambar</string>
     <string name="batal">Batal</string>
     <string name="Simpan">Simpan</string>
     <string name="hapus">Hapus</string>
