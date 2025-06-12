@@ -1,15 +1,9 @@
 package com.adamchaniago0025.assesment3.ui.screen
 
-import android.content.ContentResolver
 import android.content.Context
 import android.content.res.Configuration
-import android.graphics.Bitmap
-import android.graphics.ImageDecoder
-import android.os.Build
-import android.provider.MediaStore
 import android.util.Log
 import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -73,10 +67,6 @@ import com.adamchaniago0025.assesment3.network.ApiStatus
 import com.adamchaniago0025.assesment3.network.ResepApi
 import com.adamchaniago0025.assesment3.network.UserDataStore
 import com.adamchaniago0025.assesment3.ui.theme.Mobpro1Theme
-import com.canhub.cropper.CropImageContract
-import com.canhub.cropper.CropImageContractOptions
-import com.canhub.cropper.CropImageOptions
-import com.canhub.cropper.CropImageView
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
@@ -111,8 +101,8 @@ fun MainScreen() {
                 ),
                 actions = {
                     IconButton(onClick = {
-                        if (user.email.isEmpty()) {
-                            CoroutineScope(Dispatchers.IO).launch { signIn(context, dataStore) }
+                        if (user.token.isEmpty()) {
+                            CoroutineScope(Dispatchers.IO).launch { signIn(viewModel, context, dataStore) }
                         } else {
                             showDialog = true
                         }
@@ -306,7 +296,8 @@ fun ListItem(resep: Resep, onDelete: () -> Unit) {
     }
 }
 
-private suspend fun signIn(context: Context, dataStore: UserDataStore) {
+private suspend fun signIn(viewModel: MainViewModel, context: Context, dataStore: UserDataStore) {
+    println(BuildConfig.API_KEY)
     val googleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder()
         .setFilterByAuthorizedAccounts(false)
         .setServerClientId(BuildConfig.API_KEY)
@@ -319,13 +310,14 @@ private suspend fun signIn(context: Context, dataStore: UserDataStore) {
     try {
         val credentialManager = CredentialManager.create(context)
         val result = credentialManager.getCredential(context, request)
-        handleSignIn(result, dataStore)
+        handleSignIn(viewModel, result, dataStore)
     } catch (e: GetCredentialException) {
         Log.e("SIGN-IN", "Error: ${e.errorMessage}")
     }
 }
 
 private suspend fun handleSignIn(
+    viewModel: MainViewModel,
     result: GetCredentialResponse,
     dataStore: UserDataStore
 ) {
@@ -338,7 +330,25 @@ private suspend fun handleSignIn(
             val nama = googleId.displayName ?: ""
             val email = googleId.id
             val photoUrl = googleId.profilePictureUri.toString()
-            dataStore.saveData(User(nama, email, photoUrl))
+            val token = googleId.idToken
+            if (token.isNotEmpty()) {
+                val tokenR = viewModel.register(nama, email, token)
+
+                if (tokenR.isEmpty()) {
+                    Log.e("SIGN-IN", "Error: registration failed")
+                    return
+                }
+
+                dataStore.saveData(
+                    User(
+                        token = "Bearer $tokenR",
+                        name = nama,
+                        email = email,
+                        photoUrl = photoUrl
+                    )
+                )
+                Log.d("SIGN-IN", "Success: $nama, $email, $photoUrl, $tokenR")
+            }
         } catch (e: GoogleIdTokenParsingException) {
             Log.e("SIGN-IN", "Error: ${e.message}")
         }
