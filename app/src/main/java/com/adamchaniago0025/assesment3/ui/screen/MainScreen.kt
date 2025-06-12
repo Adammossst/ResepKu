@@ -6,11 +6,13 @@ import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -206,8 +208,10 @@ fun ScreenContent(viewModel: MainViewModel, token: String, modifier: Modifier = 
                 columns = GridCells.Fixed(2),
                 contentPadding = PaddingValues(bottom = 80.dp)
             ) {
-                items(data) { ListItem(it) {
+                items(data) { ListItem(it, {
                     onDelete(it)
+                }) {
+                    showDetailDialog = it
                 } }
             }
         }
@@ -238,11 +242,12 @@ fun ScreenContent(viewModel: MainViewModel, token: String, modifier: Modifier = 
 
 
 @Composable
-fun ListItem(resep: Resep, onDelete: () -> Unit) {
+fun ListItem(resep: Resep, onDelete: () -> Unit, onClick: () -> Unit = {}) {
     Box(
         modifier = Modifier
             .padding(4.dp)
-            .border(1.dp, Color.Gray),
+            .border(1.dp, Color.Gray)
+            .clickable { if (resep.mine == "1") onClick() },
         contentAlignment = Alignment.BottomCenter
     ) {
         AsyncImage(
@@ -256,6 +261,7 @@ fun ListItem(resep: Resep, onDelete: () -> Unit) {
             error = painterResource(id = R.drawable.broken_img),
             modifier = Modifier
                 .fillMaxWidth()
+                .aspectRatio(1f)
                 .padding(4.dp)
         )
         Column(
