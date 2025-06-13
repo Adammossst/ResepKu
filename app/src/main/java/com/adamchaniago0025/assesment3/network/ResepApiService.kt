@@ -78,7 +78,7 @@ object ResepApi {
         retrofit.create(ResepApiService::class.java)
     }
     fun getResepUrl(imageId: Long) :String {
-        return "${BASE_URL}resep/image/$imageId"
+        return "${BASE_URL}resep/image/$imageId?timestamp=${System.currentTimeMillis()}"
     }
 }
 
