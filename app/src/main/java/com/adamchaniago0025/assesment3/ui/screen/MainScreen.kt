@@ -291,6 +291,12 @@ fun ListItem(resep: Resep, onDelete: () -> Unit, onClick: () -> Unit = {}) {
                         fontWeight = FontWeight.Bold,
                         color = Color.White
                     )
+                    Text(
+                        text = resep.deskripsi,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
                 }
                 if (resep.mine == "1") {
                     IconButton(onClick = { onDelete() }) {
