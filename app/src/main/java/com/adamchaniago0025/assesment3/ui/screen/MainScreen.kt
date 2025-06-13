@@ -119,13 +119,17 @@ fun MainScreen() {
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = {
-                showResepDialog = true
-            }) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = stringResource(id = R.string.tambah_resep)
-                )
+            if (user.token.isNotEmpty()) {
+                FloatingActionButton(
+                    onClick = {
+                        showResepDialog = true
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = stringResource(id = R.string.tambah_resep)
+                    )
+                }
             }
         },
     ) { innePading ->
